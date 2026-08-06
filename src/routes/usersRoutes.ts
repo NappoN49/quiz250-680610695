@@ -17,10 +17,32 @@ const router = Router();
 // POST /api/vXXX/auth/login
 router.post("/login", (req: Request, res: Response) => {
   try { 
+    const { username, password } = req.body;
+    const user = users.find((user) => user.username === username && user.password === password,);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Username or Password is incorrect",
+      });
+    }
+
+    const jwt_secret = process.env.JWT_SECRET || "Quiz02_secret_key";
+  const token = jwt.sign(
+    {
+        username : user.username,
+        userId : user.userId,
+    },
+    jwt_secret,
+    { expiresIn: "10m" }
+  );
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
+      token: token
     });
+
   } catch (err) {
     return res.status(500).json({
       success: false,
